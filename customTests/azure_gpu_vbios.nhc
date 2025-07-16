@@ -4,6 +4,7 @@ source /etc/nhc/scripts/azure_common.nhc
 
 function check_vbios_version() {
     expected_version="$1"
+    vecho "Running: nvidia-smi -q | grep \"VBIOS Version\" | cut -d ':' -f 2 | sed 's/ //g' | uniq"
     uniq_vbios_versions=$(nvidia-smi -q | grep "VBIOS Version" | cut -d ':' -f 2 | sed 's/ //g' | uniq)
 
     if [ ${#uniq_vbios_versions[@]} -ne 1 ]; then

@@ -12,6 +12,7 @@ function collect_ecc_data() {
    
    if [[ $ECC_TYPE == "SDBE" ]]; then
       # implement collect data
+      vecho "Running: nvidia-smi -q -d PAGE_RETIREMENT"
       page_retirement_query_out=$(nvidia-smi -q -d PAGE_RETIREMENT)
       page_retirement_query_out_rc=$?
       
@@ -23,6 +24,7 @@ function collect_ecc_data() {
       TAB=$'\t'
       echo ""
    else
+      vecho "Running: nvidia-smi --query-gpu=$GPU_QUERY --format=csv,noheader"
       gpu_query_out=$(nvidia-smi --query-gpu=$GPU_QUERY --format=csv,noheader)
       gpu_query_out_rc=$?
       if [[ $gpu_query_out_rc != 0 ]]
@@ -30,6 +32,7 @@ function collect_ecc_data() {
       log "$gpu_query_out"
       die 1 "$FUNCNAME: nvidia-smi (get gpu uncorrected counts) returned error code $gpu_query_out_rc. FaultCode: NHCNA"
       fi
+      vecho "Running: nvidia-smi --query-remapped-rows=$GPU_REMAPPED_ROWS_QUERY --format=csv,noheader"
       gpu_remapped_rows_out=$(nvidia-smi --query-remapped-rows=$GPU_REMAPPED_ROWS_QUERY --format=csv,noheader)
       gpu_remapped_rows_out_rc=$?
       if [[ $gpu_remapped_rows_out_rc != 0 ]]
@@ -142,6 +145,7 @@ function check_SDBE_ecc(){
 
 
 function check_gpu_ecc() {
+    vecho "Running: lspci | grep -i 'VGA\|3D controller'| grep -qi 'V100'"
     if lspci | grep -i 'VGA\|3D controller'| grep -qi 'V100'; then
       check_SDBE_ecc
    else

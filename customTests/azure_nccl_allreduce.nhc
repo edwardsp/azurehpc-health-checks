@@ -6,6 +6,7 @@ source /etc/nhc/scripts/azure_common.nhc
 function collect_nccl_allreduce_data() {
    MESSAGE_SIZE=$1
    TOPOFILE=$2
+   vecho "Running: nvidia-smi --list-gpus | wc -l"
    gpu_count=$(nvidia-smi --list-gpus | wc -l)
 
    if [ -z "$gpu_count" ]; then
@@ -18,6 +19,7 @@ function collect_nccl_allreduce_data() {
 
    # ensure unloaded before use
    MPI_ARGS="-np $gpu_count --map-by ppr:$gpu_count:node -bind-to numa -mca coll_hcoll_enable 0 --allow-run-as-root"
+   vecho "Running: mpirun $MPI_ARGS $ENVIRON_VARS $ALL_REDUCE_PATH $NCCL_ARGS"
    nccl_allreduce_out=$(mpirun $MPI_ARGS $ENVIRON_VARS $ALL_REDUCE_PATH $NCCL_ARGS)
    nccl_allreduce_out_rc=$?
    if [[ $nccl_allreduce_out_rc != 0 ]]; then

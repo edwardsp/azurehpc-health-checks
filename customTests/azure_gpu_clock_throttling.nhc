@@ -19,6 +19,7 @@ GPU_CLOCKS_THROTTLE_REASON_SYNC_BOOST=0x0000000000000010
 function collect_gpu_clock_throttle_data() {
    # build proper command based on nvidia-smi version
    desired_version="535.54.03"
+   vecho "Running: nvidia-smi --id=0 --query-gpu=driver_version --format=csv,noheader"
    nvidia_smi_version=$(nvidia-smi --id=0 --query-gpu=driver_version --format=csv,noheader)
    if [[ "$(echo -e "$nvidia_smi_version\n$desired_version" | sort -V | head -n1)" == "$desired_version" ]]; then
       GPU_THROTTLE_QUERY="clocks_event_reasons.active"
@@ -26,6 +27,7 @@ function collect_gpu_clock_throttle_data() {
       GPU_THROTTLE_QUERY="clocks_throttle_reasons.active"
    fi
 
+   vecho "Running: nvidia-smi --query-gpu=$GPU_THROTTLE_QUERY --format=csv,noheader,nounits"
    gpu_clock_throttle_query_out=$(nvidia-smi --query-gpu=$GPU_THROTTLE_QUERY --format=csv,noheader,nounits)
    gpu_clock_throttle_query_rc=$?
    if [[ $gpu_clock_throttle_query_rc != 0 ]]; then

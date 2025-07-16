@@ -25,10 +25,12 @@ function run_ib_bw_gdr(){
    MESSAGE_SIZE=8388608
    IB_WRITE_BW=$( basename $IB_WRITE_BW_EXE_PATH )
    IB_WRITE_BW_ARGS="-p $PORTARG -s $MESSAGE_SIZE -x 0 -F --report_gbits  --perform_warm_up"
+   vecho "Running: numactl -N $numa_node -m $numa_node $IB_WRITE_BW_EXE_PATH $IB_WRITE_BW_ARGS --use_cuda=$dev_idx -d $device > /dev/null &"
    IB_WRITE_BW_OUT1=$(numactl -N $numa_node -m $numa_node $IB_WRITE_BW_EXE_PATH $IB_WRITE_BW_ARGS --use_cuda=$dev_idx -d $device > /dev/null &)
    IB_WRITE_BW_OUT1_RC=$?
  
    if [[ $IB_WRITE_BW_OUT1_RC != 0 ]]; then
+	 vecho "Running: netstat -lnp | grep $PORTARG"
 	 NETSTAT_OUT=$(netstat -lnp | grep $PORTARG)
 	 log "Running: netstat -lnp | grep $PORTARG:"
 	 log "$NETSTAT_OUT"
@@ -38,9 +40,11 @@ function run_ib_bw_gdr(){
   
   sleep $SLEEP_TIME
   device_peer=$device
+  vecho "Running: numactl -N $numa_node -m $numa_node $IB_WRITE_BW_EXE_PATH $IB_WRITE_BW_ARGS --use_cuda=$dev_idx -d $device_peer $HOSTNAME"
   IB_WRITE_BW_OUT2=$(numactl -N $numa_node  -m $numa_node $IB_WRITE_BW_EXE_PATH $IB_WRITE_BW_ARGS --use_cuda=$dev_idx -d $device_peer $HOSTNAME)
   IB_WRITE_BW_OUT2_RC=$?
   if [[ $IB_WRITE_BW_OUT2_RC != 0 ]]; then
+	 vecho "Running: netstat -lnp | grep $PORTARG"
 	 NETSTAT_OUT=$(netstat -lnp | grep $PORTARG)
 	 log "Running: netstat -lnp | grep $PORTARG:"
 	 log "$NETSTAT_OUT"
@@ -73,6 +77,7 @@ function run_ib_bw_gdr(){
 function check_ib_bw_gdr(){
    trap "background_cleanup" RETURN
    
+   vecho "Running: boost_gpu_clock"
    GPU_FREQ=$(boost_gpu_clock)
    if [[ $? != 0 ]]; then
       die 1 -e "$FUNCNAME: Failed to boost GPU clocks. FaultCode: NHCNA"

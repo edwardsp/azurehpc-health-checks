@@ -8,6 +8,7 @@ PERSISTENCE_GPU_QUERY="persistence_mode"
 
 function collect_persistence_data() {
 
+   vecho "Running: nvidia-smi --query-gpu=$PERSISTENCE_GPU_QUERY --format=csv,noheader"
    gpu_query_out=$(nvidia-smi --query-gpu=$PERSISTENCE_GPU_QUERY --format=csv,noheader)
    gpu_query_out_rc=$?
    if [[ $gpu_query_out_rc != 0 ]]; then
@@ -28,6 +29,7 @@ function check_gpu_persistence() {
    do
       if [[ ${gpu_query_out_lines[$i]} == Disabled ]]; then
          dbg "$FUNCNAME: GPU id $i: Persistence mode is disabled, will attempt to enable"
+         vecho "Running: nvidia-smi -i $i -pm 1"
          gpu_persistence_out=$(nvidia-smi -i $i -pm 1)
          gpu_persistence_out_rc=$?
          if [[ $gpu_query_out_rc != 0 ]]; then

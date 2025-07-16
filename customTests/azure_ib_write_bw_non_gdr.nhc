@@ -25,6 +25,7 @@ function ib_write(){
    fi
 
    IB_WRITE_BW_ARGS="-s $MSG_SIZE -D ${IB_WRITE_BW_DURATION} -x 0 -F --report_gbits --perform_warm_up -d $device -q 2"
+   vecho "Running: numactl --membind=$numa_node -C $numa_core $IB_WRITE_BW_EXE_PATH $IB_WRITE_BW_ARGS > /dev/null &"
    IB_WRITE_BW_OUT1=$( numactl --membind=$numa_node -C $numa_core  $IB_WRITE_BW_EXE_PATH $IB_WRITE_BW_ARGS  > /dev/null &)
 
    IB_WRITE_BW_OUT1_RC=$?
@@ -35,6 +36,7 @@ function ib_write(){
          die 1 "check_ib_bw_non_gdr: $IB_WRITE_BW returned error code $IB_WRITE_BW_OUT1_RC, Port argument was not specified. FaultCode: NHCNA"
          return 1
       fi
+      vecho "Running: netstat -lnp | grep $PORT"
       NETSTAT_OUT=$(netstat -lnp | grep $PORT)
       log "Running: netstat -lnp | grep $PORT:"
       log "$NETSTAT_OUT"
@@ -42,6 +44,7 @@ function ib_write(){
       return 1
    fi
    sleep $SLEEP_TIME
+   vecho "Running: numactl --membind=$numa_node -C $(( numa_core + 1 )) $IB_WRITE_BW_EXE_PATH $IB_WRITE_BW_ARGS $HOSTNAME"
    IB_WRITE_BW_OUT2=$( numactl --membind=$numa_node -C $(( numa_core + 1 )) $IB_WRITE_BW_EXE_PATH $IB_WRITE_BW_ARGS $HOSTNAME)
 
    IB_WRITE_BW_OUT2_RC=$?
@@ -52,6 +55,7 @@ function ib_write(){
          die 1 "check_ib_bw_non_gdr: $IB_WRITE_BW returned error code $IB_WRITE_BW_OUT2_RC, Port argument was not specified. faultCode: NHCNA"
          return 1
       fi
+      vecho "Running: netstat -lnp | grep $PORT"
       NETSTAT_OUT=$(netstat -lnp | grep $PORT)
       log "Running: netstat -lnp | grep $PORT:"
       log "$NETSTAT_OUT"

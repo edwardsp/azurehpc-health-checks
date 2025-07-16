@@ -7,8 +7,10 @@ function check_gpu_count() {
    GPU_TYPE="$2"
 
    if [ "$GPU_TYPE" == "rocm" ]; then
+      vecho "Running: rocm-smi -l | grep 'GPU' | wc -l"
       gpu_count=$(rocm-smi -l | grep 'GPU' | wc -l)
    else
+      vecho "Running: nvidia-smi --list-gpus | wc -l"
       gpu_count=$(nvidia-smi --list-gpus | wc -l)
    fi  
 

@@ -24,21 +24,26 @@ function check_gpu_xid()
    fi
 
    # check for any xid errors
+   vecho "Running: grep -q \"Xid\" $kernel_log"
    grep -q "Xid" $kernel_log
    RC=$?
    if [ $RC == 0 ]; then
       for XID in $XID_EC; do
+         vecho "Running: grep \"Xid.*: $XID,\" $kernel_log | tail -n 1"
          xid_found_line=$(grep "Xid.*: $XID," $kernel_log  | tail -n 1)
          if [ "$xid_found_line" != "" ]; then
             logXid=$(echo "$xid_found_line" | awk -F ',' '{print $1}' )
             logMsg="Found XID: $logXid"
             log_date="$(echo "$logXid" | awk '{print $1, $2, $3}') $(date +"%Y")"
+            vecho "Running: date -d \"$log_date\" +\"%s\""
             log_date=$(date -d "$log_date" +"%s")
+            vecho "Running: date +\"%s\""
             current_ts=$(date +"%s")
             diff=$(( (current_ts - log_date) / 3600 ))
             
             if [ "$diff" -le $time_threshold ]; then
                # check if the XID has been reported in the log before
+               vecho "Running: grep -qF \"$logMsg\" \"$logfile\""
                if grep -qF "$logMsg" "$logfile"; then
                   log "This XID has been reported before: $logXid."
                else

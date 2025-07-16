@@ -25,6 +25,7 @@ function cleanup {
 #input, and if an error code is tripped throw the second input as a message
 catch_error() {
     declare -g output
+    vecho "Running: $1"
     output=$($1)
     err_code=$?
     if [ $err_code -ne 0 ]; then
@@ -127,6 +128,7 @@ function check_nvBW_gpu_bw()
 
     # Lock graphics clocks to max freq to eliminate any time for the GPUs to boost.
     error_smi="check_gpu_bw: Failed raise GPU clocks with error code"
+    vecho "Running: boost_gpu_clock"
     if ! boost_gpu_clock > /dev/null 2>&1 ; then
         die 1 -e "check_gpu_bw: $error_smi. FaultCode: NHCNA"
         return 0
@@ -193,6 +195,7 @@ function check_nvBW_gpu_bw()
 function get_OAM_pairs(){
     # Get OAM pairs
     # return array where the index is the GPU id and the value is the OAM pair
+    vecho "Running: rocm-smi --showserial | grep GPU"
     oam_check=$(rocm-smi --showserial | grep GPU)
 
     if [[ "$oam_check" == *"Not supported"* ]]; then
@@ -201,6 +204,7 @@ function get_OAM_pairs(){
         return 0
     fi
 
+    vecho "Running: rocm-smi --showserial | grep GPU | awk '{print \$5}'"
     mapfile -t gsn < <(rocm-smi --showserial | grep GPU | awk '{print $5}')
 
     oam_pairs=()
@@ -339,6 +343,7 @@ function check_rocm_gpu_bw(){
 
 function check_gpu_bw(){
     trap "background_cleanup" RETURN
+    vecho "Running: lspci | grep -iq NVIDIA"
     if lspci | grep -iq NVIDIA ; then
 	    # Check GPU BW using NVBandwidth
         EXP_GPU_PCIE_BW=$1

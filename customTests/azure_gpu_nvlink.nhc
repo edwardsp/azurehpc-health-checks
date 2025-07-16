@@ -4,7 +4,9 @@ source /etc/nhc/scripts/azure_common.nhc
 
 function check_nvlink_status(){
     # Check if nvlink is enabled
+    vecho "Running: nvidia-smi --list-gpus | wc -l"
     num_gpus=$(nvidia-smi --list-gpus | wc -l)
+    vecho "Running: nvidia-smi nvlink --status"
     nvlink_status=$(nvidia-smi nvlink --status)
     
     if [ $? -ne 0 ]; then
@@ -20,6 +22,7 @@ function check_nvlink_status(){
     for ((i=0; i<num_gpus; i++)); do
         gpu_id=$i
         # Run nvlink command
+        vecho "Running: nvidia-smi nvlink -s -i $gpu_id"
         nvlink_output=$(nvidia-smi nvlink -s -i $gpu_id)
         if [ $? -ne 0 ]; then
             die 1 "$FUNCNAME: Failed to get NVLINK status with error code $?. FaultCode: NHC2016"

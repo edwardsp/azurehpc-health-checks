@@ -8,6 +8,7 @@ NVIDIA_SMI_HEALTHMON="${NVIDIA_SMI_HEALTHMON:-nvidia-smi}"
 NVIDIA_SMI_HEALTHMON_ARGS="${NVIDIA_SMI_HEALTHMON_ARGS}"
 
 if lspci | grep -iq NVIDIA ; then
+    vecho "Running: nvidia-smi"
     NVSMI_OUTPUT_VAR="$(nvidia-smi)"
 fi
 
@@ -21,6 +22,7 @@ export NVSMI_HEALTHMON_LINES NVSMI_HEALTHMON_OUTPUT NVSMI_HEALTHMON_RC NVSMI_OUT
 function nhc_nvsmi_gather_data() {
     local IFS
 
+    vecho "Running: $NVIDIA_SMI_HEALTHMON $NVIDIA_SMI_HEALTHMON_ARGS"
     NVSMI_HEALTHMON_OUTPUT=$($NVIDIA_SMI_HEALTHMON $NVIDIA_SMI_HEALTHMON_ARGS 2>/dev/null)
     NVSMI_HEALTHMON_RC=$?
     IFS=$'\n'
